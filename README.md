@@ -5,7 +5,7 @@ This is a project for the Udacity front end nanodegree.  It is a neighborhood ma
 ## Basic Instruction
 
 1. Open the index.html file in a modern browser (chrome, firefox, ie11, etc.).
-2. Click markers or list items to select a location and retrieve info about it.
+2. Click on list items or on the marks to select a location and retrieve info about it.
 3. Type into the filter/search box to filter the shown locations.
 4. Click anywhere on the actual map to close the information window that opens.
 
