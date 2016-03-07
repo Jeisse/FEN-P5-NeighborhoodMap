@@ -10,7 +10,7 @@
 		<link href="css/style.css" rel="stylesheet">
 	</head>
 	<body>
-		<div class="fs-list">
+		<div class="fs-list navbar-inverse">
 			<div class="search-fs">
 				<form class="input-group" data-bind="submit: updatefsResults">
 					<input type="text" class="form-control" data-bind="value: searchTerm">
@@ -18,14 +18,35 @@
 						<button class="btn btn-danger" type="button" data-bind="click: updatefsResults">Go!</button>
 					</span>
 				</form>
-				<button class="btn btn-primary btn-xs" type="button" data-bind="click: getMyLocation">Look arround on my current Location!</button>
+				<button type="button" class="navbar-toggle" data-bind="click: colapseNav">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<button class="btn btn-primary " type="button" data-bind="click: getMyLocation">Look around on my current Location!</button>
 			</div>
-			<ul class="results"></ul>
+			<ul class="results">
+				<li data-bind="foreach: places">
+					<div class="heading row">
+						<p class="col-sm-3 img-container">
+							<img data-bind="text: placesData().img" src="" height=100 width=100 class="img-thumbnail">
+							<span data-bind="text: placesData().rate"> Rate: </span>
+						</p>
+						<div class="col-sm-9">
+							<h3 data-bind="text: placesData().name" ></h3>
+							<p><span data-bind="text: placesData().address"><br></span></p>
+							<p><strong data-bind="text: placesData().phone"></strong></p>
+							<p><a data-bind="text: placesData().canonicalUrl" href="#" class="btn btn-default btn-xs" target="_blank">See on Foursquare</a></p>
+							<p><a data-bind="text: placesData().url" href="" class="" target="_blank">See WebSite</a></p>
+						</div>
+					</div>
+				</li>
+			</ul>
 		</div>
 
 		 <div id="map-canvas"></div>
-
-		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"></script>		
+	
+		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJo9sOA94cTY2TKnM1GH13CS3SOBda830&callback=initMap" async defer onerror="googleError()"></script>	
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
 		<script src="knockout/dist/knockout.js"></script>
 		<script src="js/script.js" type="text/javascript"></script>

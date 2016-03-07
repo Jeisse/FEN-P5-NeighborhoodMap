@@ -1,16 +1,18 @@
-
 //Initializing global variables
-var map;
-var lat = 53.345615;
-var lng = -6.264155;
+var map,
+	lat = 53.345615,
+	lng = -6.264155,
+	fsClientId = '1LJNHGRXVKQUREYLERJFYKAOCBEBJCOTRN5W5CGH5YN3P1AB',
+	fsClientSecret = 'PM5IMHDOH2OJ1T3ODPQWMAO3LN2AD4ELC2NQ255QUANZIAA0';
+
 allMarkers = [];
 
-//Main function to create google map		
-function initialize() {
+//Main function to create google map
+function initMap() {
 	//Set the variable for the starting point
 	var startPoint = new google.maps.LatLng(lat, lng);
 	var startSearch = 'Temple Bar';
-	
+
 	//Set the variable for the google map option
 	var mapOptions = {
 		zoom: 16,
@@ -23,6 +25,11 @@ function initialize() {
 
 	//Call function to start showing a foursquare list
 	getVenues(startSearch);
+}
+
+function googleError() {
+  //This will be called when there was an error
+  $('.results').addClass('open').append('<li><h3>Oh no!</br> Seems that we can\'t load Google Maps.</h3></li>');
 }
 
 //Main function to create and place markers on google map
@@ -207,6 +214,7 @@ function makefoursquareList(d){
 
 	//Create the markers Array object	
 	var markers = [];
+	var list = [];
 
 	//If no data is returned				
 	if(results.length > 0){	
@@ -219,7 +227,7 @@ function makefoursquareList(d){
 				ph = business.venue.contact.formattedPhone ? business.venue.contact.formattedPhone : '',
 				url = business.venue.url ? business.venue.url : '#',
 				rate = business.venue.rating ? business.venue.rating : '0.0',
-				canonicalUrl = business.tips[0].canonicalUrl ? business.tips[0].canonicalUrl : '#',
+				canonicalUrl = (business.hasOwnProperty('tips') && (0 < business.tips.length)) ? business.tips[0].canonicalUrl : '#',
 				loc = {
 					lat: business.venue.location.lat,
 					lon: business.venue.location.lng,
@@ -227,9 +235,26 @@ function makefoursquareList(d){
 				}
 				review = {
 					img: business.venue.categories[0].icon.prefix+'64'+business.venue.categories[0].icon.suffix,
-					txt: business.tips[0].text
+					txt: (business.hasOwnProperty('tips') && (0 < business.tips.length)) ? business.tips[0].text : '#'
 				};
-					
+
+				///isso
+				var data = {};
+				data.name = business.venue.name;
+				data.img = business.venue.categories[0].icon.prefix+'64'+business.venue.categories[0].icon.suffix;
+				data.phone = business.venue.contact.formattedPhone ? business.venue.contact.formattedPhone : '';
+				data.url = business.venue.url ? business.venue.url : '#';
+				data.rate = business.venue.rating ? business.venue.rating : '0.0';
+				data.canonicalUrl = (business.hasOwnProperty('tips') && (0 < business.tips.length)) ? business.tips[0].canonicalUrl : '#';
+				data.lat = business.venue.location.lat;
+				data.lng = business.venue.location.lng;
+				data.address = business.venue.location.formattedAddress;
+				data.txtReview = (business.hasOwnProperty('tips') && (0 < business.tips.length)) ? business.tips[0].text : '';
+
+				var location = new Location(data);
+				var itemList = {name: location.name , img: location.img, rate: location.rate, address: location.address, phone: location.phone};
+				
+				//
 			//Create the Dom object									
 			var makeEl = '<li><div class="heading row"><p class="col-sm-3 img-container">';
 			makeEl += '<img src="' + img + '" height=100 width=100 class="img-thumbnail">';
@@ -238,12 +263,14 @@ function makefoursquareList(d){
 			makeEl += '<h3>' + name + '</h3><p>';
 			makeEl += '<span>' + loc.address + '</span></p>';
 			makeEl += '<p><strong>' + ph + '</strong></p>';
-			makeEl += '<p><a class="btn btn-default btn-xs" href="' + canonicalUrl + '" target="_blank">See Foursquare</a></p>';
+			makeEl += '<p><a class="btn btn-default btn-xs" href="' + canonicalUrl + '" target="_blank">See on Foursquare</a></p>';
 			makeEl += '<p><a class="" href="' + url + '" target="_blank">See WebSite</a></p>';
 			makeEl += '</div></div></li>';
 			
 			//Add to the el variable										
 			el += makeEl;
+
+			list.push(itemList);
 
 			//Create the marker array object
 			//then add marker to the markers array object												
@@ -253,7 +280,8 @@ function makefoursquareList(d){
 
 		//Add the el to the fs-list ul dom												
 		$foursquareList.append(el);
-		
+
+      		
 		//Use google map api to create the markers to place on the map												
 		google.maps.event.addDomListener(window, 'load', addGoogleMapsMarkers(markers));
 		
@@ -271,8 +299,8 @@ function makefoursquareList(d){
 //Ajax function to get places/Venues on Foursquare API
 function getVenues(search) {
 	var config = {
-		client_id: '1LJNHGRXVKQUREYLERJFYKAOCBEBJCOTRN5W5CGH5YN3P1AB',
-		client_secret: 'PM5IMHDOH2OJ1T3ODPQWMAO3LN2AD4ELC2NQ255QUANZIAA0',
+		client_id: fsClientId,
+		client_secret: fsClientSecret,
 		query: search
 	};
 	var url = "https://api.foursquare.com/v2/venues/explore?ll="+lat+","+lng+"&client_id="+config.client_id+"&client_secret="+config.client_secret+"&v=20160302&query="+config.query+"";
@@ -308,9 +336,9 @@ function geoFindMe(search) {
 
 		}, function(error) {
 			clearTimeout(location_timeout);
-		geolocFail();
+			geolocFail();
 		});
-		} else {
+	} else {
 		// Fallback for no geolocation
 		geolocFail();
 	}
@@ -322,8 +350,8 @@ function geolocFail(){
 
 	//Use google map api to clear the markers on the map													
 	google.maps.event.addDomListener(window, 'load', addGoogleMapsMarkers(markers));
-
 }
 
-//Initialize app
-initialize();
+function showOrHideNav() {
+	$('.results').toggle();
+}

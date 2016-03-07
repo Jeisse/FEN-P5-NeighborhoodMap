@@ -1,5 +1,7 @@
 @import url(http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300);
-body,html,#map-canvas{
+body,
+html,
+#map-canvas{
 	margin:0
 }
 #map-canvas{
@@ -20,14 +22,16 @@ h1{
 	text-align:center;
 	ackground-color:rgba(255,255,255,0.65)
 }
-.fs-list ul,.search-fs{
+.fs-list ul,
+.search-fs{
 	position:fixed;
 	top:0;
 	width:400px;
 	background-color:rgba(0,0,0,.5)
 }
 @media (max-width: 700px){
-	.fs-list ul,.search-fs{
+	.fs-list ul,
+	.search-fs{
 		width:50%
 	}
 	.search-fs{
@@ -95,7 +99,7 @@ h1{
 	background-color:rgba(51, 51, 51, 0.63)
 }
 .search-fs{
-	padding:20px;
+	padding:15px;
 	z-index:10
 }
 .search-fs small{
@@ -145,4 +149,9 @@ h1{
 	color:#ff4e00;
 	float:right;
 	margin-top:10px
+}
+.navbar-toggle {
+	display: block;
+	margin: 0px 2px 0px 0px;
+
 }
