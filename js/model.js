@@ -2,7 +2,8 @@
 var lat = 53.345615,
 	lng = -6.264155,
 	fsClientId = '1LJNHGRXVKQUREYLERJFYKAOCBEBJCOTRN5W5CGH5YN3P1AB',
-	fsClientSecret = 'PM5IMHDOH2OJ1T3ODPQWMAO3LN2AD4ELC2NQ255QUANZIAA0';
+	fsClientSecret = 'PM5IMHDOH2OJ1T3ODPQWMAO3LN2AD4ELC2NQ255QUANZIAA0',
+	vm = '';
 
 // Constructor for Place
 var Place = function(data) {
@@ -23,6 +24,10 @@ var Place = function(data) {
 function initMap() {
 	//Set the variable for the starting point
 	var startPoint = new google.maps.LatLng(lat, lng);
+	vm = new ViewModel();
+	//Start knockout dependency tracking
+	ko.applyBindings(vm);
+
 
 	//Set the variable for the google map option
 	var mapOptions = {
@@ -33,7 +38,7 @@ function initMap() {
 
 	//Create a new map object
 	vm.map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions); 
-	
+
 	// Initialize markers
 	vm.markers = [];
 
@@ -62,13 +67,16 @@ function ViewModel() {
 	self.searchTerm = ko.observable('Temple Bar');
 
 	// Set location list observable array from PlaceData
-	this.placeList = ko.observableArray([]);
+	self.placeList = ko.observableArray([]);
 
 	//Inicialize the list
 	self.foursquare(lat, lng, self.searchTerm());
 
 	// Initial current location to be the first one.
-	this.currentPlace = ko.observable(this.placeList()[0]);
+	self.currentPlace = ko.observable(this.placeList()[0]);
+
+	// Initially blank
+	self.errorMessage = ko.observable(''); 
 
 	// Functions invoked when user clicked an item in the list.
 	this.setPlace = function(clickedPlace) {
@@ -98,14 +106,19 @@ function ViewModel() {
 			});
 		}
 	});
-	
+
+	// Subscribe to changed in search field. If have change, render again with the filered locations.
+  	this.filteredItems.subscribe(function(){
+		self.renderMarkers(self.filteredItems());
+  	});
+
 	//function to update the view model	
 	self.updatefsResults = function(){
 		//return the updated data from the search field
 		//then run the ajax function to create the foursquare list
 		ko.computed(function(){
-			//getVenues(self.searchTerm());
-			self.foursquare(lat, lng, self.searchTerm());
+			self.renderMarkers(self.filteredItems());
+			//self.foursquare(lat, lng, self.searchTerm());
 		}, self);
 	};
 
@@ -136,7 +149,6 @@ ViewModel.prototype.renderMarkers = function(arrayInput) {
 	// Clear old markers before render
 	this.clearMarkers();
 	var infowindow = this.infowindow;
-	var context = this;
 	var placeToShow = arrayInput;
 
 	// Create new marker for each place in array and push to markers array
@@ -154,7 +166,7 @@ ViewModel.prototype.renderMarkers = function(arrayInput) {
 		this.markers[i].setMap(this.map);
 
 		// add event listener for click event to the newly created marker
-		marker.addListener('click', this.activateMarker(marker, context, infowindow, i));
+		marker.addListener('click', this.activateMarker(marker, this, infowindow, i));
 	}
 };
 
@@ -175,7 +187,9 @@ ViewModel.prototype.activateMarker = function(marker, context, infowindow, index
 		// check if have an index. If have an index mean request come from click on the marker event
 		if (!isNaN(index)) {
 			var place = context.filteredItems()[index];
-			context.updateContent(place);
+			if (place !== undefined){
+				context.updateContent(place);
+			}
 		}
 		// closed opened infowindow
 		infowindow.close();
@@ -187,26 +201,6 @@ ViewModel.prototype.activateMarker = function(marker, context, infowindow, index
 		infowindow.open(context.map, marker);
 		
 		vm.toggleBounce(marker, index);
-
-		//Apply google maps event method to bind a mouseover event to the marker
-		//on event, create and show info window using the makeInfoWindow Method         
-		google.maps.event
-		.addListener(marker, 'mouseover', (function(marker, index) {
-			return function() {
-				makeInfoWindow(marker);
-			}
-		})(marker, index));
-
-		//Apply google maps event method to bind a mouse click event to the marker
-		//on event, create and show info window using the makeInfoWindow Method
-		//and animate the marker        	        
-		google.maps.event
-		.addListener(marker, 'click', (function(marker, index){
-			return function(){
-				makeInfoWindow(marker);
-				toggleBounce(marker, index);
-			}
-		})(marker, index));
 	};
 };
 
@@ -214,17 +208,13 @@ ViewModel.prototype.activateMarker = function(marker, context, infowindow, index
 ViewModel.prototype.toggleBounce = function(mk, i) {
 	//Create the variable       		
 	var fsMarkerDetailUl =  $('.fs-list').find('ul'),
-		fsMarkerDetail = fsMarkerDetailUl.find('li'),
-		fsMarkerDetailPos = 212 * i,
-		activefsMarkerDetail = fsMarkerDetail.eq(i);
+		fsMarkerDetailPos = 180 * i;
 
 	//If the marker has animation attribute then remove the animation attribute
 	//also remove the show className from the fs-list ul dom to slide left
 	//also remove the active className from the active fs-list ul li dom         
-	if (mk.getAnimation() != null) {
+	if (mk.getAnimation() !== null) {
 		mk.setAnimation(null);
-		fsMarkerDetailUl.removeClass('show');
-		activefsMarkerDetail.removeClass('active');
 
 	//If marker does not have animation attribue
 	//remove animation attribute from any other markers that are animated
@@ -232,7 +222,7 @@ ViewModel.prototype.toggleBounce = function(mk, i) {
 	//add the show className from the fs-list ul dom to slide right
 	//also add the active className to the fs-list ul li dom         
 	} else {
-		for(am in allMarkers){
+		for(var am in allMarkers){
 			// iterate through all the markers and see if it has the animation attribute
 			var isMoving = allMarkers[am].getAnimation();
 			//if marker is animating and index is not self
@@ -249,8 +239,6 @@ ViewModel.prototype.toggleBounce = function(mk, i) {
 		fsMarkerDetailUl.addClass('show').animate({
 			scrollTop: fsMarkerDetailPos
 		}, 300);
-		fsMarkerDetailUl.find('.active').removeClass('active');
-		activefsMarkerDetail.addClass('active');
 	}
 };
 
@@ -277,7 +265,7 @@ ViewModel.prototype.foursquare = function(lat, lng, search) {
 
 	//Set timeout in case of fail
 	var fAjaxRequestTimeout = setTimeout(function(){
-		$('.results').addClass('open').append('<li><h3>Oh no!</br> Seems that we can\'t find anything.</h3></li>');
+		vm.errorMessage('Oh no! Seems that we can\'t find anything.');
 	},8000);
 
 	$.ajax({
@@ -286,14 +274,13 @@ ViewModel.prototype.foursquare = function(lat, lng, search) {
 		dataType : 'jsonp',
 	}).done(function(data){
 		var results = data.response.groups[0].items;
-		var $foursquareList = $('.results');
 
 		//Clear the foursquareList to add new entries
-		$foursquareList.empty();
-		//vm.clearMarkers();
+		vm.placeList.removeAll();
+		vm.clearMarkers();
 
 
-			//If no data is returned				
+	//If no data is returned				
 	if(results.length > 0){	
 		//Loop through the returned data
 		//then create the variable for to use in populating the fs-list					
@@ -318,19 +305,13 @@ ViewModel.prototype.foursquare = function(lat, lng, search) {
 			vm.renderMarkers(vm.placeList());
 			clearTimeout(fAjaxRequestTimeout);
 		} else {
-			var searchedFor = $('input').val();
-			$foursquareList.addClass('open').append('<li><h3>Oh no! Seems that we can\'t find anything on <span>' + searchedFor + '</span>.</h3><p>Trying searching something else.</p></li>');
-
+			vm.searchTerm = ko.observable('');
+			vm.errorMessage('<h3>Oh no!</br> Seems that we can\'t find anything.</h3>');
 			//Use google map api to clear the markers on the map													
 			google.maps.event.addDomListener(window, 'load', addGoogleMapsMarkers(markers));
 		}	
 	});
 };
-
-
-var vm = new ViewModel();
-//Start knockout dependency tracking
-ko.applyBindings(vm);
 
 //Find current location, using HTML5 Geolocation
 ViewModel.prototype.geoFindMe = function (search) {
@@ -369,17 +350,17 @@ ViewModel.prototype.geoFindMe = function (search) {
 }
 
 function geolocFail(){
-	var $foursquareList = $('.results');
-	$foursquareList.addClass('open').append('<li><h3>Oh no! Seems that we can\'t find anything.</h3></li>');
+	vm.searchTerm ('');
+	vm.errorMessage('Oh no! Seems that we can\'t find anything.');
 
 	//Use google map api to clear the markers on the map													
 	google.maps.event.addDomListener(window, 'load', addGoogleMapsMarkers(markers));
 }
 
-
 function googleError() {
-  //This will be called when there was an error
-  $('.results').addClass('open').append('<li><h3>Oh no!</br> Seems that we can\'t load Google Maps.</h3></li>');
+	//This will be called when there was an error
+	vm.errorMessage('Oh no! Seems that we can\'t find anything.');
+	//$('.results').addClass('open').append('<li><h3>Oh no!</br> Seems that we can\'t load Google Maps.</h3></li>');
 }
 
 ViewModel.prototype.showOrHideNav = function() {
