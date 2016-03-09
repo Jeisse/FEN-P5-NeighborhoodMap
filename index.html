@@ -24,6 +24,7 @@
 					<span class="icon-bar"></span>
 				</button>
 				<button class="btn btn-primary " type="button" data-bind="click: getMyLocation">Look around on my current Location!</button>
+				<h3 class="white" data-bind="text: errorMessage"></h3>
 			</nav>
 
 			<inside class="showHide">
@@ -51,8 +52,8 @@
 		
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
 		<script src="knockout/dist/knockout.js"></script>
-		<script src="js/model.js" type="text/javascript"></script>
-		<script src="js/script.js" type="text/javascript"></script>
+		<script src="js/model.js"></script>
+		<script src="js/script.js"></script>
 		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJo9sOA94cTY2TKnM1GH13CS3SOBda830&callback=initMap" async defer onerror="googleError()"></script>
 	</body>
 </html>
