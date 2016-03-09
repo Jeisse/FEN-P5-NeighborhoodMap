@@ -11,9 +11,9 @@
 	</head>
 	<body>
 		<div class="fs-list navbar-inverse">
-			<div class="search-fs">
+			<nav class="search-fs">
 				<form class="input-group" data-bind="submit: updatefsResults">
-					<input type="text" class="form-control" data-bind="value: searchTerm">
+					<input type="text" class="form-control" data-bind="value: searchTerm, valueUpdate: 'afterkeydown'">
 					<span class="input-group-btn">
 						<button class="btn btn-danger" type="button" data-bind="click: updatefsResults">Go!</button>
 					</span>
@@ -24,9 +24,9 @@
 					<span class="icon-bar"></span>
 				</button>
 				<button class="btn btn-primary " type="button" data-bind="click: getMyLocation">Look around on my current Location!</button>
-				<h3 class="white" data-bind="text: errorMessage"></h3>
-			</div>
-			<div class="showHide">
+			</nav>
+
+			<inside class="showHide">
 			  	<ul data-bind="foreach: filteredItems" class="results">
 					<li data-bind="click: $parent.setPlace">
 						<div class="heading row">
@@ -44,10 +44,10 @@
 						</div>
 					</li>
 				</ul>
-            </div>
+            </inside>
 		</div>
 		
-		<div id="map-canvas"></div>
+		<main id="map-canvas"></main>
 		
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
 		<script src="knockout/dist/knockout.js"></script>

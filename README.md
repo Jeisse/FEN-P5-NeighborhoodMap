@@ -8,6 +8,7 @@ This is a project for the Udacity front end nanodegree.  It is a neighborhood ma
 2. Click on list items or on the marks to select a location and retrieve info about it.
 3. Type into the filter/search box to filter the shown locations.
 4. Click anywhere on the actual map to close the information window that opens.
+5. See places around you clicking on "Look arround on my current Location" button.
 
 ## Notes
 
@@ -18,3 +19,4 @@ This is a project for the Udacity front end nanodegree.  It is a neighborhood ma
 * Foursquare API powers the site information outside of the map and can get your current locatin to you best view
 * Google maps api was used.
 * Foursquare API was used to search places to then display on the Map
+* To use the functionality "Look arround on my current Location" on Chrome when running app locally, you'll need to run the app on localhost. You can use Python's simpleHTTPServer, see this article to set up enviroment: http://www.pythonforbeginners.com/modules-in-python/how-to-use-simplehttpserver/.

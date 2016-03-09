@@ -107,11 +107,6 @@ function ViewModel() {
 		}
 	});
 
-	// Subscribe to changed in search field. If have change, render again with the filered locations.
-  	this.filteredItems.subscribe(function(){
-		self.renderMarkers(self.filteredItems());
-  	});
-
 	//function to update the view model	
 	self.updatefsResults = function(){
 		//return the updated data from the search field
@@ -150,17 +145,20 @@ ViewModel.prototype.renderMarkers = function(arrayInput) {
 	this.clearMarkers();
 	var infowindow = this.infowindow;
 	var placeToShow = arrayInput;
+	var bounds = new google.maps.LatLngBounds();
 
 	// Create new marker for each place in array and push to markers array
 	for (var i = 0, len = placeToShow.length; i < len; i ++) {
 		var location = {lat: placeToShow[i].lat, lng: placeToShow[i].lng};
+		var currentLatlng = new google.maps.LatLng(placeToShow[i].lat, placeToShow[i].lng);
 		var marker = new google.maps.Marker({
 				position: location,
-				map: this.map,
-				//icon: 'img/map-pin-01.png'
+				map: this.map
 			});
 
 		this.markers.push(marker);
+
+		bounds.extend(currentLatlng);
 
 		//render in the map
 		this.markers[i].setMap(this.map);
@@ -168,6 +166,7 @@ ViewModel.prototype.renderMarkers = function(arrayInput) {
 		// add event listener for click event to the newly created marker
 		marker.addListener('click', this.activateMarker(marker, this, infowindow, i));
 	}
+	this.map.fitBounds(bounds);
 };
 
 // Set all marker icons back to default icons.
@@ -359,7 +358,7 @@ function geolocFail(){
 
 function googleError() {
 	//This will be called when there was an error
-	vm.errorMessage('Oh no! Seems that we can\'t find anything.');
+	alert('Oh no! Seems that we can\'t find anything.');
 	//$('.results').addClass('open').append('<li><h3>Oh no!</br> Seems that we can\'t load Google Maps.</h3></li>');
 }
 

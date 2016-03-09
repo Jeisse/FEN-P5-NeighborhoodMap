@@ -5,9 +5,6 @@ var allMarkers = [];
 //takes marker variable as a parameter		
 function addGoogleMapsMarkers(m){  
 
-	//Display multiple markers on a map
-	var infoWindow = new google.maps.InfoWindow();
-
 	//Function to create Info window for the google map marker
 	//Takes the marker data as a parameter    
 	function makeInfoWindow(mk){
@@ -78,20 +75,6 @@ function addGoogleMapsMarkers(m){
 			};
 		})(mkr, i));
 	}
-
-	//Add click event to the fs-list ul li dom         			
-	$('.results').find('li').click(function(){
-		//Get index of clicked element
-		var pos = $(this).index();
-		//Iterate through allMarkers array
-		for(var am in allMarkers){
-			var isMoving = allMarkers[am].getAnimation();
-			//If marker is animated, remove animation
-			if(isMoving && am !== pos){
-				allMarkers[am].setAnimation(null);
-			}
-		}
-	});	
 
 }
 
